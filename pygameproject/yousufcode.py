@@ -1,8 +1,6 @@
 import pygame
 from sys import exit
 
-from pygame.sprite import Group
-
 pygame.init()
 screen = pygame.display.set_mode((1000, 700))
 pygame.display.set_caption("Block Place")
@@ -12,7 +10,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        # Player PLaceholder
+        # Player Placeholder
         self.width = 40
         self.image = pygame.Surface((self.width, self.width), pygame.SRCALPHA)
         pygame.draw.rect(self.image, (255, 255, 0, 255), (0, 0, self.width, self.width))
@@ -30,10 +28,6 @@ class Player(pygame.sprite.Sprite):
         pygame.draw.rect(self.block_hover, (255, 255, 0, 64), self.block_hover.get_rect())
         self.block_hover_rect = self.block_hover.get_rect(center=(cursor))
 
-        # Placed block
-        self.block_placed = pygame.Surface((self.width//2, self.width//2), pygame.SRCALPHA)
-        pygame.draw.rect(self.block_placed, (255, 255, 0), self.block_placed.get_rect())
-        self.block_placed_rect = self.block_placed.get_rect(center=(cursor))
     def mouse_block(self):
         cursor = pygame.mouse.get_pos()
         return cursor
@@ -41,8 +35,19 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         cursor = self.mouse_block()
         self.block_hover_rect.center = cursor
+
+class Block(pygame.sprite.Sprite):
+    def __init__(self, position):
+        super().__init__()
+        self.width = 40
+        # Placed block
+        self.block_placed = pygame.Surface((self.width//2, self.width//2), pygame.SRCALPHA)
+        pygame.draw.rect(self.block_placed, (255, 255, 0), self.block_placed.get_rect())
+        self.block_placed_rect = self.block_placed.get_rect(center=position)
+
 # Groups
 player = Player()
+blocks = []
 
 while True:
     for event in pygame.event.get():
@@ -52,16 +57,23 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if player.block_hover_rect.colliderect(player.indicator_rect):
                 print("Block Placed")
-                player.block_placed_rect = player.block_hover_rect.copy()
-
+                # Create a new block with the current position of the block_hover_rect
+                new_block = Block(player.block_hover_rect.center)
+                blocks.append(new_block)
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                for block in blocks:
+                    if block.block_placed_rect.colliderect(player.block_hover_rect):
+                        print("Block Deleted")
+                        blocks.remove(block)
     screen.fill("Grey")
 
     screen.blit(player.image, player.rect.topleft)
     screen.blit(player.indicator, player.indicator_rect.topleft)
-    if player.block_hover_rect in player.indicator_rect:
+    if player.block_hover_rect.colliderect(player.indicator_rect):
         screen.blit(player.block_hover, player.block_hover_rect)
-    if player.block_placed_rect.colliderect(player.indicator_rect):
-        screen.blit(player.block_placed, player.block_placed_rect.topleft)
+    for block in blocks:
+        screen.blit(block.block_placed, block.block_placed_rect.topleft)
     player.update()
 
     pygame.display.update()
