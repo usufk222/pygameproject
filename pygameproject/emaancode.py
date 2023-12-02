@@ -8,7 +8,14 @@ SCREEN_HEIGHT = 400
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Moving Rectangle")
 
+# Load the background image
+background_image = pygame.image.load("220px-Pixel_art_grass_image.png")
+background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
 rect_2 = pygame.Rect(200, 200, 50, 50)  # Create a rectangle
+
+def Background(image):
+    screen.blit(image, (0, 0))
 
 clock = pygame.time.Clock()
 
@@ -18,6 +25,9 @@ while run:
 
     # Fill the background white
     screen.fill((255, 255, 255))
+
+    # Draw the background
+    Background(background_image)
 
     # Player controls
     keys = pygame.key.get_pressed()
@@ -40,3 +50,4 @@ while run:
     pygame.display.flip()
 
 pygame.quit()
+
