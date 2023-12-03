@@ -6,6 +6,8 @@ from random import randint
 
 
 class Game:
+    
+    screen = pygame.display.set_mode((1280,670))
     def __init__(self):
         # setting up the display screen and the clock to control the framerate and speed
         pygame.init()
@@ -30,39 +32,40 @@ class Game:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if Player.block_hover_rect.colliderect(Player.indicator_rect):
+                    if self.level.player.block_hover_rect.colliderect(self.level.player.indicator_rect):
                         print("Block Placed")
                         # Create a new block with the current position of the block_hover_rect
-                        new_block = Block(Player.block_hover_rect.center)
-                        Level.blocks.append(new_block)    
+                        new_block = Block(self.level.player.block_hover_rect.center)
+                        self.level.blocks.append(new_block)    
                 elif event.type == pygame.KEYDOWN:
                     # Block Deleting Keys
                     if event.key == pygame.K_SPACE:
-                        for block in Level.blocks:
-                            if block.block_placed_rect.colliderect(Player.block_hover_rect):
+                        for block in self.level.blocks:
+                            if block.block_placed_rect.colliderect(self.level.player.block_hover_rect):
                                 print("Block Deleted")
-                                Level.blocks.remove(block)
+                                self.level.blocks.remove(block)
                     # Block changing keys
                     elif event.key == pygame.K_1:
-                        Player.block_index = 0
+                        self.level.player.block_index = 0
                         print("Block changed")
                     elif event.key == pygame.K_2:
                         print("Block changed")
-                        Player.block_index = 1
+                        self.level.player.block_index = 1
                     elif event.key == pygame.K_3:
                         print("Block changed")
-                        Player.block_index = 2
+                        self.level.player.block_index = 2
                     elif event.key == pygame.K_4:
                         print("Block changed")
-                        Player.block_index = 3
+                        self.level.player.block_index = 3
                     elif event.key == pygame.K_5:
                         print("Random block selected")
-                        Player.random_color(4)
+                        self.level.player.random_color(4)
             delta_time = self.clock.tick()/1000
             self.level.run(delta_time) 
             pygame.display.update()
 
 class Level:
+
     def __init__(self):
         self.display=pygame.display.get_surface()
 
@@ -78,9 +81,9 @@ class Level:
         self.display.fill((0, 0, 0))  # Fill the display with black color
         self.allSprites.draw(self.display)
         self.allSprites.update(delta_time)
-        self.display.blit(Player.indicator, Player.indicator_rect.topleft)
-        if Player.block_hover_rect.colliderect(Player.indicator_rect):
-            self.display.blit(Player.block_hover, Player.block_hover_rect)
+        self.display.blit(self.player.indicator, self.player.indicator_rect.topleft)
+        if self.player.block_hover_rect.colliderect(self.player.indicator_rect):
+            self.display.blit(self.player.block_hover, self.player.block_hover_rect)
         for block in self.blocks:
             self.display.blit(block.block_placed, block.block_placed_rect.topleft)
 
@@ -94,18 +97,24 @@ class Block(pygame.sprite.Sprite):
         self.block_placed_rect = self.block_placed.get_rect(center=position)
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, group):
+
+    block_colors = [(255, 255, 0, 255), (255, 0, 0, 255), (0, 255, 0, 255), (0, 0, 255, 255)]
+    block_hover_colors = [(255, 255, 0, 64), (255, 0, 0, 64), (0, 255, 0, 64), (0, 0, 255, 64)]
+    block_index = 0
+
+    def __init__(self, pos, group, level=Level):
   
         super().__init__(group)
         # super helps access stuff in parent class
+        self.level = level
         self.import_animations()
         self.status = 'front'
         self.frame_index = 0
 
+
         self.block_colors = [(255, 255, 0, 255), (255, 0, 0, 255), (0, 255, 0, 255), (0, 0, 255, 255)]
         self.block_hover_colors = [(255, 255, 0, 64), (255, 0, 0, 64), (0, 255, 0, 64), (0, 0, 255, 64)]
         self.block_index = 0
-        self.width = self.image.get_width()
 
         # coding image
         self.image= self.animations[self.status][0]
@@ -117,6 +126,7 @@ class Player(pygame.sprite.Sprite):
         self.pos = pygame.math.Vector2(self.rect.center)
         self.speed = 200
 
+        self.width = self.image.get_width()
         # coding block placing visuals
         self.usable_width = self.width * 3
         self.indicator = pygame.Surface((self.usable_width * 3, self.usable_width * 3), pygame.SRCALPHA)
@@ -186,9 +196,6 @@ class Player(pygame.sprite.Sprite):
         return cursor
     
     def update_colors(self):
-        self.image = pygame.Surface((self.width, self.width), pygame.SRCALPHA)
-        pygame.draw.rect(self.image, self.block_colors[self.block_index], (0, 0, self.width, self.width))
-
         self.indicator = pygame.Surface((self.usable_width * 3, self.usable_width * 3), pygame.SRCALPHA)
         pygame.draw.rect(self.indicator, self.block_hover_colors[self.block_index], self.indicator.get_rect(), 5)
 
@@ -198,9 +205,10 @@ class Player(pygame.sprite.Sprite):
     def random_color(self, n):
         if n > 0:
             Player.block_index = randint(0, 4)
+            self.random_color(n - 1)
         else:
             Player.block_index = randint(0, 4)
-            self.random_color(n - 1)
+
 
     
 
