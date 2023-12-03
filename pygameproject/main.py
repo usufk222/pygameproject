@@ -2,7 +2,7 @@ import pygame
 import sys
 import time
 import os
-
+from random import randint
 
 
 class Game:
@@ -55,6 +55,9 @@ class Game:
                     elif event.key == pygame.K_4:
                         print("Block changed")
                         Player.block_index = 3
+                    elif event.key == pygame.K_5:
+                        print("Random block selected")
+                        Player.random_color(4)
             delta_time = self.clock.tick()/1000
             self.level.run(delta_time) 
             pygame.display.update()
@@ -191,6 +194,15 @@ class Player(pygame.sprite.Sprite):
 
         self.block_hover = pygame.Surface((self.width//2, self.width//2), pygame.SRCALPHA)
         pygame.draw.rect(self.block_hover, self.block_hover_colors[self.block_index], self.block_hover.get_rect())
+
+    def random_color(self, n):
+        if n > 0:
+            Player.block_index = randint(0, 4)
+        else:
+            Player.block_index = randint(0, 4)
+            self.random_color(n - 1)
+
+    
 
     def update(self, delta_time):
         self.input()
