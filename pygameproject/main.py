@@ -173,7 +173,7 @@ class Player(pygame.sprite.Sprite):
 
     def input(self):
         keys = pygame.key.get_pressed()
-
+	#the arrows on the keyboard are used to move the blocks up,down,left,and right
         if keys[pygame.K_UP]:
             self.status = 'back'
             self.direction.y -= 5
