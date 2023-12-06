@@ -256,6 +256,5 @@ def import_folder(path, animation):
     return surface_list
 
 if __name__ == '__main__':
-    # ask yousuf what main does
     game = Game()
     game.run()
